@@ -1,7 +1,7 @@
 {
   "name": "minikodi",
   "version": "1.0.0",
-  "description": "Reproductor multimedia estilo Kodi con instalación automática de mods y soporte torrent",
+  "description": "Reproductor multimedia estilo Kodi con instalaci\u00f3n autom\u00e1tica de mods y soporte torrent",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -10,15 +10,23 @@
     "build:linux": "electron-builder --linux",
     "test": "jest"
   },
-  "keywords": ["kodi", "media", "player", "torrent", "mods"],
+  "keywords": [
+    "kodi",
+    "media",
+    "player",
+    "torrent",
+    "mods"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
     "electron": "^28.0.0",
-    "electron-builder": "^24.9.1"
+    "electron-builder": "^24.9.1",
+    "jest": "^29.7.0"
   },
   "dependencies": {
-    "extract-zip": "^2.0.1"
+    "extract-zip": "^2.0.1",
+    "archiver": "^6.0.0"
   },
   "build": {
     "appId": "com.minikodi.player",
@@ -33,17 +41,26 @@
       "resources/**/*"
     ],
     "win": {
-      "target": ["nsis"],
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
       "icon": "resources/icon.ico"
     },
     "linux": {
-      "target": ["deb", "AppImage"],
+      "target": [
+        {
+          "target": "appimage",
+          "arch": ["x64"]
+        }
+      ],
       "icon": "resources/icon.png",
       "category": "AudioVideo"
     },
-    "nsis": {
-      "oneClick": true,
-      "allowToChangeInstallationDirectory": false
+    "portable": {
+      "artifactName": "${productName}-Portable-${version}.${ext}"
     }
   }
 }
