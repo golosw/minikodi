@@ -8,10 +8,12 @@ REM ============================================
 
 setlocal enabledelayedexpansion
 
-REM Crear carpeta de log inmediatamente
-if not exist "log" mkdir log
+REM Crear carpeta de log inmediatamente - FORZAR creacion
+mkdir log 2>nul
 set LOGFILE=log\install.log
-echo [%date% %time%] MiniKodi Installation Started >> %LOGFILE%
+
+REM Escribir primer mensaje SIEMPRE - usar echo normal para crear archivo
+echo [%date% %time%] MiniKodi Installation Started > %LOGFILE%
 
 echo ============================================
 echo   MiniKodi Installer for Windows
@@ -63,12 +65,29 @@ where node >nul 2>&1
 if %errorlevel% neq 0 (
     echo ERROR: Node.js installation failed. Please install from https://nodejs.org
     echo [%date% %time%] CRITICAL: Node.js not available after install attempts >> %LOGFILE%
+    echo.
+    echo See log file for details: %LOGFILE%
     pause
     exit /b 1
 )
 
-REM Mostrar version de Node
+REM Verificar npm tambien
+where npm >nul 2>&1
+if %errorlevel% neq 0 (
+    echo ERROR: npm not found even though Node.js is installed
+    echo [%date% %time%] CRITICAL: npm not available >> %LOGFILE%
+    pause
+    exit /b 1
+)
+
+REM Mostrar version de Node y npm
+echo.
+echo Node.js version:
+node --version
 node --version >> %LOGFILE% 2>&1
+
+echo npm version:
+npm --version
 npm --version >> %LOGFILE% 2>&1
 
 REM Instalar dependencias del proyecto
@@ -80,6 +99,8 @@ call npm install >> %LOGFILE% 2>&1
 if %errorlevel% neq 0 (
     echo Failed to install dependencies!
     echo [%date% %time%] FAILED npm install >> %LOGFILE%
+    echo.
+    echo Check log for details: %LOGFILE%
     pause
     exit /b 1
 )
@@ -96,17 +117,30 @@ node -e "require('webtorrent'); console.log('OK')" >> %LOGFILE% 2>&1
 if %errorlevel% neq 0 (
     echo Warning: webtorrent verification failed, but continuing...
     echo [%date% %time%] webtorrent verification warning >> %LOGFILE%
+) else (
+    echo webtorrent OK!
+    echo [%date% %time%] webtorrent verified >> %LOGFILE%
 )
+
+REM Limpiar dist anterior si existe
+echo.
+echo Cleaning previous builds...
+echo [%date% %time%] Cleaning dist folder >> %LOGFILE%
+if exist "dist" rmdir /s /q dist
+mkdir dist
 
 REM Build de Electron
 echo.
-echo Building Electron application...
+echo Building Electron application (this may take several minutes)...
 echo [%date% %time%] Running electron-builder >> %LOGFILE%
 
 call npx electron-builder --win --linux >> %LOGFILE% 2>&1
 if %errorlevel% neq 0 (
-    echo Failed to build application!
+    echo.
+    echo FAILED to build application!
     echo [%date% %time%] FAILED electron-builder >> %LOGFILE%
+    echo.
+    echo Check log for details: %LOGFILE%
     pause
     exit /b 1
 )
@@ -117,14 +151,26 @@ echo   Installation completed successfully!
 echo ============================================
 echo [%date% %time%] Installation completed >> %LOGFILE%
 echo.
-echo Portable executable created:
-dir /b dist\*.exe >> %LOGFILE% 2>&1
-for %%f in (dist\*.exe) do (
-    echo   - %%f
-    echo [%date% %time%] Portable exe: %%f >> %LOGFILE%
+
+REM Verificar que se creo el exe portable
+if exist "dist\MiniKodi-Portable.exe" (
+    echo Portable executable created successfully:
+    echo   - dist\MiniKodi-Portable.exe
+    echo [%date% %time%] Portable exe: MiniKodi-Portable.exe >> %LOGFILE%
+) else if exist "dist\win-unpacked\MiniKodi.exe" (
+    echo Unpacked executable created:
+    echo   - dist\win-unpacked\MiniKodi.exe
+    echo [%date% %time%] Unpacked exe: win-unpacked\MiniKodi.exe >> %LOGFILE%
+) else (
+    echo WARNING: Expected exe not found in dist/
+    echo [%date% %time%] WARNING: exe location uncertain >> %LOGFILE%
+    echo Contents of dist/:
+    dir /b dist >> %LOGFILE% 2>&1
 )
+
 echo.
 echo Opening dist folder...
+echo [%date% %time%] Opening dist folder >> %LOGFILE%
 explorer dist
 
 echo.
@@ -133,5 +179,8 @@ echo   IMPORTANT: The .exe in dist/ is PORTABLE
 echo   Just copy it and double-click to run!
 echo   No installation required on other PCs.
 echo ============================================
+echo.
+echo Log file: %LOGFILE%
+echo.
 
 pause
