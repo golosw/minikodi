@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src 'self' file: blob:; connect-src 'self' https://api.github.com">
+    <title>MiniKodi v1.0.0</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar de Navegación -->
+        <aside class="sidebar">
+            <div class="logo">
+                <img src="../resources/icon.png" alt="MiniKodi" class="logo-icon">
+                <h1>MiniKodi</h1>
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-btn active" data-section="home">🏠 Inicio</button>
+                <button class="nav-btn" data-section="mods">📦 Mods</button>
+                <button class="nav-btn" data-section="media">🎬 Multimedia</button>
+                <button class="nav-btn" data-section="favorites">⭐ Favoritos</button>
+                <button class="nav-btn disabled" data-section="torrent" title="⏸️ Funcionalidad pendiente - Fase 2" aria-disabled="true">🧲 Torrent</button>
+                <button class="nav-btn" data-section="settings">⚙️ Configuración</button>
+                <button class="nav-btn" data-section="help">❓ Ayuda</button>
+            </nav>
+            <div class="version-info">v1.0.0 - Portable</div>
+        </aside>
+
+        <!-- Contenido Principal -->
+        <main class="main-content">
+            <!-- Sección: Inicio -->
+            <section id="home" class="section active">
+                <h2>Bienvenido a MiniKodi</h2>
+                <div class="dashboard">
+                    <div class="card">
+                        <h3>📦 Mods Instalados</h3>
+                        <p id="mods-count">0</p>
+                    </div>
+                    <div class="card">
+                        <h3>⭐ Favoritos</h3>
+                        <p id="favorites-count">0</p>
+                    </div>
+                    <div class="card">
+                        <h3>🎬 Últimos Reproducidos</h3>
+                        <p id="recent-count">0</p>
+                    </div>
+                </div>
+                <div class="quick-actions">
+                    <button id="btn-browse-mods" class="action-btn">Explorar Mods</button>
+                    <button id="btn-add-favorite" class="action-btn">Añadir Favorito</button>
+                    <button id="btn-play-media" class="action-btn">Reproducir Archivo</button>
+                </div>
+            </section>
+
+            <!-- Sección: Mods -->
+            <section id="mods" class="section">
+                <h2>Gestor de Mods</h2>
+                <div class="search-bar">
+                    <input type="text" id="mod-search" placeholder="Buscar mods...">
+                    <button id="btn-search-mods">🔍 Buscar</button>
+                </div>
+                <div id="mods-results" class="results-grid"></div>
+                <div class="install-zone">
+                    <h3>Instalar desde ZIP</h3>
+                    <input type="file" id="mod-zip-input" accept=".zip">
+                    <button id="btn-install-zip">Instalar ZIP</button>
+                </div>
+            </section>
+
+            <!-- Sección: Multimedia -->
+            <section id="media" class="section">
+                <h2>Reproductor Multimedia</h2>
+                <div class="player-container">
+                    <video id="media-player" controls style="width: 100%; max-height: 500px; background: #000;">
+                        Tu navegador no soporta reproducción de video.
+                    </video>
+                    <audio id="audio-player" controls style="width: 100%; margin-top: 10px;"></audio>
+                </div>
+                <div class="file-browser">
+                    <button id="btn-open-file">📂 Abrir Archivo</button>
+                    <input type="file" id="media-file-input" accept="video/*,audio/*" style="display: none;">
+                </div>
+            </section>
+
+            <!-- Sección: Favoritos -->
+            <section id="favorites" class="section">
+                <h2>Mis Favoritos</h2>
+                <div id="favorites-list" class="favorites-grid"></div>
+            </section>
+
+            <!-- Sección: Torrent (DESHABILITADA) -->
+            <section id="torrent" class="section disabled-section" style="opacity: 0.5; pointer-events: none;">
+                <h2>🧲 Torrent (Próximamente - Fase 2)</h2>
+                <div class="disabled-message">
+                    <p>⏸️ Esta funcionalidad está temporalmente deshabilitada.</p>
+                    <p>Se implementará en una futura actualización con soporte completo para:</p>
+                    <ul>
+                        <li>Descarga de torrents vía magnet link</li>
+                        <li>Streaming directo mientras se descarga</li>
+                        <li>Gestión de colas de descarga</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Sección: Configuración -->
+            <section id="settings" class="section">
+                <h2>Configuración</h2>
+                <div class="settings-group">
+                    <label>
+                        <input type="checkbox" id="setting-autostart"> Iniciar con el sistema
+                    </label>
+                    <label>
+                        <input type="checkbox" id="setting-dark-mode" checked> Modo oscuro
+                    </label>
+                    <label>
+                        <input type="checkbox" id="setting-notifications" checked> Notificaciones
+                    </label>
+                </div>
+                <div class="paths-info">
+                    <h3>Rutas del Sistema</h3>
+                    <pre id="paths-display"></pre>
+                </div>
+                <button id="btn-check-updates" class="action-btn">🔄 Buscar Actualizaciones</button>
+            </section>
+
+            <!-- Sección: Ayuda -->
+            <section id="help" class="section">
+                <h2>Ayuda y Documentación</h2>
+                <div class="help-content">
+                    <iframe id="help-frame" src="../help.txt" style="width: 100%; height: 400px; border: 1px solid #ccc; background: #fff;"></iframe>
+                    <button id="btn-open-help-file" class="action-btn">📄 Abrir help.txt en editor</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>

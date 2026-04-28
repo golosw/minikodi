@@ -1,0 +1,70 @@
+MINIKODI v1.0.0 - AYUDA RÁPIDA
+==============================
+
+USO PARA USUARIO FINAL (NIVEL 0):
+---------------------------------
+1. Ejecutar MiniKodi-Portable.exe (Windows) o MiniKodi-1.0.0.AppImage (Linux)
+2. La aplicación creará automáticamente las carpetas: log/, data/, temp/
+3. NO requiere instalación previa, NO pregunta nada, funciona con doble-click
+
+FUNCIONALIDADES DISPONIBLES:
+----------------------------
+✅ Búsqueda de mods en repositorio local
+✅ Instalación automática de mods en formato ZIP
+✅ Gestión de favoritos persistente (se guarda entre sesiones)
+✅ Reproducción de archivos multimedia (mp4, mkv, avi, mp3, flac)
+✅ Descarga y gestión de Torrents (WebTorrent integrado)
+
+FUNCIONALIDADES PENDIENTES (FASE 2):
+------------------------------------
+⏸️ Actualizador automático desde GitHub Releases
+⏸️ Búsqueda en repositorios remotos de mods
+
+CARPETAS QUE SE GENERAN AUTOMÁTICAMENTE:
+-----------------------------------------
+📁 log/     - Contiene logs detallados de ejecución (app_YYYY-MM-DD.log)
+📁 data/    - Almacena favoritos (favorites.json) y mods instalados
+📁 temp/    - Archivos temporales de trabajo y descargas torrent
+
+ESTRUCTURA DE LOGS:
+-------------------
+Formato: [TIMESTAMP] [LEVEL] [MODULE] Message
+Niveles: INFO (flujo normal), DEBUG (variables), WARN (recuperable), ERROR (crítico)
+Rotación: Máximo 5 archivos, 10MB cada uno
+
+TROUBLESHOOTING:
+----------------
+❓ "La aplicación no arranca"
+   → Revisar logs en carpeta log/ para ver errores específicos
+
+❓ "Los torrents no descargan"
+   → Verificar conexión a internet y puertos P2P abiertos
+
+❓ "Los favoritos no se guardan"
+   → Verificar permisos de escritura en carpeta data/
+
+❓ "Icono no se muestra"
+   → Verificar que resources/icon.ico existe (Windows) o icon.png (Linux)
+
+PORTABILIDAD:
+-------------
+✅ El ejecutable es 100% portable: puede estar en USB, escritorio, documentos
+✅ No escribe en Program Files ni en registro de Windows
+✅ Todas las configuraciones están en su propia carpeta
+✅ Puede moverse a otra PC manteniendo data/ y log/
+
+REQUISITOS DEL SISTEMA:
+-----------------------
+- Windows 10/11 o Linux (Ubuntu 20.04+, Debian 10+, Fedora 33+)
+- 500MB de espacio libre mínimo
+- Conexión a internet (para torrents y búsqueda de mods)
+- NO requiere Node.js instalado (todo está empaquetado)
+
+CONTACTO Y SOPORTE:
+-------------------
+Repositorio: https://github.com/golosw/minikodi
+Logs: Revisar carpeta log/ para debugging detallado
+
+---
+Generado bajo estándar PromptOS v14.0 Hardened
+Última actualización: 2025-04-28
