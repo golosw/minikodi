@@ -1,0 +1,45 @@
+{
+  "name": "minikodi",
+  "version": "1.0.0",
+  "description": "Reproductor multimedia portable con soporte Torrent",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win --x64",
+    "build:linux": "electron-builder --linux --x64",
+    "pack": "electron-builder --dir"
+  },
+  "author": "MiniKodi Team",
+  "license": "MIT",
+  "dependencies": {
+    "webtorrent": "^1.9.7"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.minikodi.app",
+    "productName": "MiniKodi",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "resources/**/*",
+      "help.txt",
+      "package.json"
+    ],
+    "win": {
+      "target": "portable",
+      "icon": "resources/icon.ico"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "resources/icon.png"
+    },
+    "portable": {
+      "artifactName": "${productName}-Portable-${version}.${ext}"
+    }
+  }
+}
