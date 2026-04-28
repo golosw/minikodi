@@ -5,6 +5,58 @@ const os = require('os');
 const extractZip = require('extract-zip');
 
 // ============================================
+// DETECCIÓN DE CONTEXTO: frozen/dev/installed
+// Patrón explícito para mismo código en desarrollo y producción
+// ============================================
+
+function getAppPaths() {
+  const isPackaged = app.isPackaged;
+  const isPortable = !!process.env.PORTABLE_EXECUTABLE_DIR;
+  
+  let exeDir, dataDir, logDir, tempDir;
+  
+  if (isPackaged) {
+    // PRODUCCIÓN: exe portable o instalado
+    if (isPortable) {
+      // Modo portable: todo junto al exe
+      exeDir = process.env.PORTABLE_EXECUTABLE_DIR;
+      dataDir = path.join(exeDir, 'data');
+      logDir = path.join(exeDir, 'log');
+      tempDir = path.join(exeDir, 'temp');
+    } else {
+      // Modo instalado: usar AppData/XDG
+      exeDir = path.dirname(process.execPath);
+      dataDir = path.join(app.getPath('userData'), 'data');
+      logDir = path.join(app.getPath('userData'), 'log');
+      tempDir = path.join(app.getPath('temp'), 'MiniKodi');
+    }
+  } else {
+    // DESARROLLO: directorio del proyecto
+    exeDir = __dirname;
+    dataDir = path.join(__dirname, '..', 'data');
+    logDir = path.join(__dirname, '..', 'log');
+    tempDir = path.join(__dirname, '..', 'temp');
+  }
+  
+  return { exeDir, dataDir, logDir, tempDir, isPackaged, isPortable };
+}
+
+let paths;
+
+function initializePaths() {
+  paths = getAppPaths();
+  
+  // Crear carpetas al primer arranque (zero intervención)
+  [paths.dataDir, paths.logDir, paths.tempDir].forEach(dir => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  });
+  
+  return paths;
+}
+
+// ============================================
 // SISTEMA DE LOGGING AVANZADO (DEBUG MODE)
 // ============================================
 
@@ -19,23 +71,13 @@ class AdvancedLogger {
   }
 
   initialize() {
-    const exePath = process.execPath;
-    const exeDir = path.dirname(exePath);
-    
-    // Detectar modo portable
-    const portableLocations = ['Desktop', 'Downloads'];
-    const currentFolder = exeDir.split(path.sep).pop().toLowerCase();
-    const isRoot = exeDir.length <= 3;
-    
-    this.isPortable = portableLocations.some(loc => 
-      exeDir.toLowerCase().includes(loc.toLowerCase())
-    ) || isRoot || process.env.PORTABLE === 'true';
-
-    if (this.isPortable) {
-      this.logDir = path.join(exeDir, 'log');
-    } else {
-      this.logDir = path.join(app.getPath('userData'), 'log');
+    // Usar paths detectados por initializePaths()
+    if (!paths) {
+      initializePaths();
     }
+    
+    this.isPortable = paths.isPortable;
+    this.logDir = paths.logDir;
 
     if (!fs.existsSync(this.logDir)) {
       fs.mkdirSync(this.logDir, { recursive: true });
@@ -51,6 +93,15 @@ class AdvancedLogger {
     this._writeRaw(`${'='.repeat(80)}\n\n`);
 
     this.info('INIT', 'Starting MiniKodi v1.0.0');
+    this.debug('PATHS_DETECTED', {
+      isPackaged: paths.isPackaged,
+      isPortable: paths.isPortable,
+      exeDir: paths.exeDir,
+      dataDir: paths.dataDir,
+      logDir: paths.logDir,
+      tempDir: paths.tempDir
+    });
+    
     this.debug('SYSTEM', {
       platform: process.platform,
       arch: process.arch,
@@ -58,14 +109,10 @@ class AdvancedLogger {
       electronVersion: process.versions.electron,
       chromeVersion: process.versions.chrome,
       v8Version: process.versions.v8,
-      exePath: exePath,
-      exeDir: exeDir,
-      isPortable: this.isPortable,
-      logDir: this.logDir,
-      logFile: this.logFile,
+      exePath: process.execPath,
       env: {
         NODE_ENV: process.env.NODE_ENV,
-        PORTABLE: process.env.PORTABLE,
+        PORTABLE_EXECUTABLE_DIR: process.env.PORTABLE_EXECUTABLE_DIR,
         APPDATA: process.env.APPDATA,
         USERPROFILE: process.env.USERPROFILE,
         HOME: process.env.HOME,
@@ -194,28 +241,32 @@ let mainWindow;
 let MODS_DIR;
 let FAVORITES_FILE;
 
+// Inicializar paths primero (antes de app.ready)
+initializePaths();
+
 // Inicializar logger y paths cuando app esté lista
 app.on('ready', () => {
   try {
     const logFile = logger.initialize();
     logInitialized = true;
     
-    // Ahora que app está ready, podemos usar app.getPath()
-    MODS_DIR = path.join(app.getPath('userData'), 'mods');
-    FAVORITES_FILE = path.join(app.getPath('userData'), 'favorites.json');
+    // Usar paths detectados por initializePaths()
+    MODS_DIR = path.join(paths.dataDir, 'mods');
+    FAVORITES_FILE = path.join(paths.dataDir, 'favorites.json');
     
-    logger.info('PATHS', 'Paths configured', {
-      userData: app.getPath('userData'),
+    logger.info('PATHS_CONFIGURED', 'Paths configured for data storage', {
+      userData: paths.dataDir,
       modsDir: MODS_DIR,
-      favoritesFile: FAVORITES_FILE
+      favoritesFile: FAVORITES_FILE,
+      isPackaged: paths.isPackaged,
+      isPortable: paths.isPortable
     });
   } catch (error) {
     console.error('Failed to initialize logger:', error);
   }
 });
 
-// Asegurar directorios existen
-logger.startPhase('INITIALIZATION');
+// Asegurar directorios existen (después de app.ready)
 if (!fs.existsSync(MODS_DIR)) {
   fs.mkdirSync(MODS_DIR, { recursive: true });
   logger.info('INIT', 'Created MODS_DIR', { path: MODS_DIR });
