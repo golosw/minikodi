@@ -1,0 +1,50 @@
+# MiniKodi .gitignore
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build output
+dist/
+out/
+
+# Logs
+log/
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+coverage/
+tests/temp-*/
+
+# Temp files
+tmp/
+temp/
+*.tmp
+
+# Installer artifacts
+*.exe
+*.deb
+*.AppImage
+*.dmg
+*.rpm
+
+# User data (no incluir datos del usuario en git)
+favorites.json
+mods/
+
+# Environment
+.env
+.env.local
